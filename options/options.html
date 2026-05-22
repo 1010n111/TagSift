@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=600" />
+  <title>AI 标签分类 - 设置</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">⚙️ 插件设置</h1>
+      <p class="page-desc">配置大模型 API 信息与插件行为</p>
+    </header>
+
+    <form id="configForm">
+      <!-- ====== API 配置 ====== -->
+      <section class="form-section">
+        <h2 class="form-section-title">API 配置</h2>
+
+        <div class="form-group">
+          <label class="form-label" for="apiEndpoint">接口地址</label>
+          <input type="url" id="apiEndpoint" class="form-input" 
+                 placeholder="https://api.deepseek.com/chat/completions" />
+          <p class="form-hint">支持 OpenAI 兼容格式的 API 端点</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="apiKey">API Key</label>
+          <div class="input-with-toggle">
+            <input type="password" id="apiKey" class="form-input" 
+                   placeholder="sk-xxxxxxxxxxxxxxxx" />
+            <button type="button" id="btnToggleKey" class="btn-toggle" title="显示/隐藏">👁</button>
+          </div>
+          <p class="form-hint">API Key 将加密存储于本地，不会上传至第三方</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modelName">模型名称</label>
+          <input type="text" id="modelName" class="form-input" 
+                 placeholder="deepseek-chat / gpt-4o-mini / qwen-turbo" />
+          <p class="form-hint">填写你使用的模型标识</p>
+        </div>
+      </section>
+
+      <!-- ====== 功能开关 ====== -->
+      <section class="form-section">
+        <h2 class="form-section-title">功能开关</h2>
+
+        <div class="form-switch">
+          <div class="switch-info">
+            <span class="switch-label">自动抓取网页</span>
+            <span class="switch-desc">打开弹窗时自动获取当前网页内容</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoCapture" checked />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="form-switch">
+          <div class="switch-info">
+            <span class="switch-label">自动 AI 生成标签</span>
+            <span class="switch-desc">抓取网页后自动调用 AI 生成标签</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoTag" checked />
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- ====== 自定义规则 ====== -->
+      <section class="form-section">
+        <h2 class="form-section-title">自定义规则</h2>
+        <div class="form-group">
+          <label class="form-label" for="customPrompt">额外 Prompt 规则</label>
+          <textarea id="customPrompt" class="form-textarea" rows="4"
+                    placeholder="在此输入额外的标签生成规则，例如：&#10;1. 技术类文章优先使用英文关键词&#10;2. 避免使用'其他'作为分类"></textarea>
+          <p class="form-hint">这些规则会追加到 AI 的系统提示词中</p>
+        </div>
+      </section>
+
+      <!-- ====== 主题设置 ====== -->
+      <section class="form-section">
+        <h2 class="form-section-title">主题设置</h2>
+        <div class="form-group">
+          <label class="form-label" for="theme">外观主题</label>
+          <select id="theme" class="form-select">
+            <option value="auto">跟随系统</option>
+            <option value="light">浅色模式</option>
+            <option value="dark">深色模式</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- ====== 操作按钮 ====== -->
+      <div class="form-actions">
+        <button type="button" id="btnTest" class="btn btn-secondary">🔍 测试连接</button>
+        <button type="submit" class="btn btn-primary">💾 保存设置</button>
+      </div>
+    </form>
+
+    <div id="statusMessage" class="status-message hidden"></div>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>
