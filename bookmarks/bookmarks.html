@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=800" />
+  <title>收藏夹标签管理</title>
+  <link rel="stylesheet" href="bookmarks.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ====== 顶部栏 ====== -->
+    <header class="header">
+      <h1 class="title">📂 收藏夹标签管理</h1>
+      <div class="header-actions">
+        <span id="statsInfo" class="stats-info"></span>
+        <button id="btnProcess" class="btn btn-primary">🚀 批量处理</button>
+        <button id="btnExport" class="btn btn-secondary">📤 导出</button>
+        <button id="btnImport" class="btn btn-secondary">📥 导入</button>
+        <button id="btnBack" class="btn btn-secondary">← 返回弹窗</button>
+        <input type="file" id="fileInput" class="hidden" accept=".json" />
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- ====== 左侧：搜索 + 标签统计 ====== -->
+      <aside id="sidePanel" class="side-panel">
+        <!-- 搜索栏 -->
+        <div id="searchBar" class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" class="search-input" placeholder="输入标签（空格分隔可多选）…" />
+          <button id="btnClearSearch" class="search-clear hidden">✕</button>
+        </div>
+        <!-- 标签统计 -->
+        <div id="tagStatsPanel" class="tag-stats-panel">
+          <div class="tag-stats-header">
+            <span class="tag-stats-title">🏷️ 标签统计</span>
+          </div>
+          <div id="tagStatsList" class="tag-stats-list"></div>
+        </div>
+      </aside>
+
+      <!-- ====== 右侧：主要内容 ====== -->
+      <div class="main-content">
+        <!-- ====== 进度条 ====== -->
+        <div id="progressBar" class="progress-bar hidden">
+          <div class="progress-track">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+          <span id="progressText" class="progress-text">0 / 0</span>
+          <button id="btnStopProcess" class="btn btn-stop hidden">⏹ 结束</button>
+        </div>
+
+        <!-- ====== 加载状态 ====== -->
+        <div id="loadingState" class="loading-state">
+          <div class="spinner"></div>
+          <p>正在读取收藏夹...</p>
+        </div>
+
+        <!-- ====== 搜索结果显示区 ====== -->
+        <div id="searchResults" class="search-results hidden">
+          <div id="searchResultsList" class="search-results-list"></div>
+          <div id="searchEmpty" class="search-empty hidden">
+            <p>没有匹配的书签 😕</p>
+          </div>
+        </div>
+
+        <!-- ====== 收藏夹树 ====== -->
+        <div id="treeContainer" class="tree-container hidden"></div>
+
+        <!-- ====== 空状态 ====== -->
+        <div id="emptyState" class="empty-state hidden">
+          <p>没有找到书签</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 批量处理模式选择弹窗 ====== -->
+  <div id="processModal" class="modal-overlay hidden">
+    <div class="modal-dialog">
+      <h3 class="modal-title">⚙️ 批量处理模式</h3>
+      <p class="modal-desc">请选择处理方式：</p>
+      <div class="modal-actions">
+        <button id="btnOverwriteAll" class="btn btn-modal-option">
+          <span class="modal-option-icon">🔄</span>
+          <span class="modal-option-text">
+            <strong>全部覆盖</strong>
+            <small>重新处理所有书签，覆盖已有标签</small>
+          </span>
+        </button>
+        <button id="btnProcessRemaining" class="btn btn-modal-option">
+          <span class="modal-option-icon">✅</span>
+          <span class="modal-option-text">
+            <strong>只处理收藏栏</strong>
+            <small>仅处理收藏栏中尚未生成标签的书签</small>
+          </span>
+        </button>
+      </div>
+      <button id="btnCancelProcess" class="btn btn-modal-cancel">取消</button>
+    </div>
+  </div>
+
+  <script type="module" src="bookmarks.js"></script>
+</body>
+</html>

@@ -28,6 +28,7 @@ const els = {
   btnSave: $('btnSave'),
   btnSettings: $('btnSettings'),
   btnHistory: $('btnHistory'),
+  btnBookmarks: $('btnBookmarks'),
   btnRetry: $('btnRetry'),
   btnGoSettings: $('btnGoSettings'),
   btnBack: $('btnBack'),
@@ -36,6 +37,8 @@ const els = {
   historyList: $('historyList'),
   configHint: $('configHint'),
   configHintLink: $('configHintLink'),
+  bookmarkHint: $('bookmarkHint'),
+  bookmarkHintLink: $('bookmarkHintLink'),
 };
 
 // ====== State ======
@@ -79,7 +82,26 @@ function bindEvents() {
     e.preventDefault();
     chrome.runtime.openOptionsPage();
   });
+  els.bookmarkHintLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const url = state.pageData?.url;
+    if (!url) return;
+    try {
+      await chrome.bookmarks.create({ parentId: '1', title: state.pageData.title || url, url: url });
+      els.bookmarkHint.classList.add('hidden');
+      showToast('已添加到收藏栏 ⭐');
+      // Now that it's bookmarked, proceed to generate tags
+      if (state.pageData?.content) {
+        await generateTags();
+      }
+    } catch (err) {
+      showToast('收藏失败，请重试');
+    }
+  });
   els.btnHistory.addEventListener('click', () => showHistory());
+  els.btnBookmarks.addEventListener('click', () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('bookmarks/bookmarks.html') });
+  });
   els.btnBack.addEventListener('click', () => showMainView());
   els.btnClearAll.addEventListener('click', () => clearAllHistory());
 }
@@ -160,9 +182,19 @@ async function capturePage() {
       return;
     }
 
+    // Check if the current page is in the Bookmarks Bar
+    const isBookmarked = await checkIsBookmarked(state.pageData.url);
+
     // No existing tags — auto-generate if enabled
     const config = await Storage.getConfig();
     if (config.autoTag && state.pageData.content) {
+      if (!isBookmarked) {
+        // Must bookmark first before AI generation
+        showTagSection();
+        checkApiConfigHint();
+        showBookmarkRequiredMessage();
+        return;
+      }
       await generateTags();
     } else if (!state.pageData.content) {
       showEmptyState();
@@ -204,6 +236,14 @@ function isRestrictedUrl(url) {
 async function generateTags() {
   if (!state.pageData?.content) {
     showError('无可用的网页内容，请先刷新抓取');
+    return;
+  }
+
+  // Check if page is bookmarked before generating tags
+  const isBookmarked = await checkIsBookmarked(state.pageData.url);
+  if (!isBookmarked) {
+    showTagSection();
+    showBookmarkRequiredMessage();
     return;
   }
 
@@ -520,20 +560,72 @@ function showTagSection() {
   els.errorState.classList.add('hidden');
   els.emptyState.classList.add('hidden');
   els.tagSection.classList.remove('hidden');
-  // Hide config hint by default; shown explicitly via checkApiConfigHint()
+  // Hide hints by default; shown explicitly via check* functions
   els.configHint.classList.add('hidden');
+  els.bookmarkHint.classList.add('hidden');
+  // Remove bookmark-required message (re-added by showBookmarkRequiredMessage if needed)
+  const msg = els.tagContainer.querySelector('.bookmark-required-msg');
+  if (msg) msg.remove();
+  // Fire-and-forget: check if current page should be bookmarked
+  checkBookmarkHint();
 }
 
 async function checkApiConfigHint() {
-  if (state.tags && hasAnyTags(state.tags)) return; // already have tags
+  if (state.tags && hasAnyTags(state.tags)) return;
   try {
     const config = await Storage.getConfig();
     if (!config.apiKey || !config.apiEndpoint) {
       els.configHint.classList.remove('hidden');
     }
   } catch {
-    // Silently fail — not critical
+    // Silently fail
   }
+}
+
+async function checkBookmarkHint() {
+  const url = state.pageData?.url;
+  if (!url) return;
+  try {
+    const [barNode] = await chrome.bookmarks.getSubTree('1');
+    const barUrls = collectBarUrls(barNode);
+    if (!barUrls.includes(url)) {
+      els.bookmarkHint.classList.remove('hidden');
+    }
+  } catch {
+    // bookmark API unavailable or failed
+  }
+}
+
+async function checkIsBookmarked(url) {
+  if (!url) return false;
+  try {
+    const [barNode] = await chrome.bookmarks.getSubTree('1');
+    const barUrls = collectBarUrls(barNode);
+    return barUrls.includes(url);
+  } catch {
+    return false;
+  }
+}
+
+function showBookmarkRequiredMessage() {
+  // Insert a message in the tag container indicating bookmark is required
+  const msg = document.createElement('div');
+  msg.className = 'bookmark-required-msg';
+  msg.innerHTML = '⭐ 收藏此网页后即可自动生成智能标签';
+  // Remove any existing message
+  const existing = els.tagContainer.querySelector('.bookmark-required-msg');
+  if (existing) existing.remove();
+  els.tagContainer.prepend(msg);
+  // Make sure the bookmark hint is visible
+  els.bookmarkHint.classList.remove('hidden');
+}
+
+function collectBarUrls(node, result = []) {
+  if (node.url) result.push(node.url);
+  if (node.children) {
+    node.children.forEach((child) => collectBarUrls(child, result));
+  }
+  return result;
 }
 
 function hasAnyTags(tags) {

@@ -25,6 +25,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         .catch((err) => sendResponse({ error: err.message }));
       return true;
 
+    case MESSAGE_TYPES.PROCESS_BOOKMARK:
+      handleProcessBookmark(message.url, message.customPrompt)
+        .then((result) => sendResponse(result))
+        .catch((err) => sendResponse({ error: err.message, url: message.url }));
+      return true;
+
     default:
       // Not for us — might be content script self-messages
       return false;
@@ -62,6 +68,78 @@ async function handleCapturePage(tabId) {
     url: response.url || '',
     content: response.content || '',
   };
+}
+
+// ====== Bookmark Processing ======
+async function handleProcessBookmark(url, customPrompt) {
+  if (!url) throw new Error('无效的 URL');
+
+  // Create a new tab (visible but not focused)
+  const tab = await chrome.tabs.create({ url, active: false });
+
+  try {
+    // Wait for the tab to finish loading
+    await waitForTabLoad(tab.id, 25_000);
+
+    // Inject content script and capture page data
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content/content.js'],
+    });
+
+    const pageData = await chrome.tabs.sendMessage(tab.id, { type: MESSAGE_TYPES.CAPTURE_PAGE });
+    if (!pageData || !pageData.content) {
+      throw new Error('无法获取页面内容');
+    }
+
+    // Generate tags via LLM
+    const tags = await handleGenerateTags(pageData.content, customPrompt);
+
+    // Save to storage
+    await Storage.saveRecord({
+      url: url,
+      title: pageData.title || url,
+      capturedAt: new Date().toISOString(),
+      tags: tags,
+      edited: false,
+    });
+
+    return {
+      url,
+      title: pageData.title || url,
+      tags,
+      success: true,
+    };
+  } catch (err) {
+    return {
+      url,
+      error: err.message,
+      success: false,
+    };
+  } finally {
+    // Always close the processing tab
+    try { await chrome.tabs.remove(tab.id); } catch { /* tab may already be gone */ }
+  }
+}
+
+/** Wait for a tab to finish loading, with timeout */
+function waitForTabLoad(tabId, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      chrome.tabs.onUpdated.removeListener(listener);
+      resolve(); // proceed anyway after timeout
+    }, timeoutMs);
+
+    const listener = (id, info) => {
+      if (id === tabId && info.status === 'complete') {
+        clearTimeout(timer);
+        chrome.tabs.onUpdated.removeListener(listener);
+        resolve();
+      }
+    };
+
+    chrome.tabs.onUpdated.addListener(listener);
+  });
 }
 
 // ====== Tag Generation ======
