@@ -2,6 +2,5 @@ node_modules/
 dist/
 *.crx
 *.pem
-scripts/
 .DS_Store
 Thumbs.db
