@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "AI 智能标签分类",
+  "name": "__MSG_appName__",
   "version": "1.2.0",
-  "description": "自动分析网页内容，AI 生成多维度智能标签，帮助用户高效管理浏览信息",
-  "author": "Vibe Coding",
+  "default_locale": "zh_CN",
+  "description": "__MSG_appDesc__",
+  "author": "1010n111",
   "homepage_url": "https://github.com/1010n111/TagSift",
   "permissions": [
     "storage",

@@ -33,16 +33,24 @@ $BuildDir = Join-Path $PackageDir "_build"
 New-Item -ItemType Directory -Path $BuildDir | Out-Null
 
 # ---- 定义需要打包的文件和目录 ----
+# File list — specific files (no wildcards)
 $IncludeItems = @(
     "manifest.json",
+    "_locales",
     "background",
     "bookmarks",
     "content",
-    "icons",
     "imgs",
     "lib",
     "options",
     "popup"
+)
+
+# Specific icon files only (icons/ may contain unrelated images)
+$IconFiles = @(
+    "icons/icon16.png",
+    "icons/icon48.png",
+    "icons/icon128.png"
 )
 
 # ---- 复制文件 ----
@@ -64,6 +72,19 @@ foreach ($item in $IncludeItems) {
         }
     } else {
         Write-Host "  ⚠ $item not found" -ForegroundColor Yellow
+    }
+}
+
+# ---- 复制图标文件（精选，避免混入截图） ----
+$iconDest = Join-Path $BuildDir "icons"
+New-Item -ItemType Directory -Path $iconDest -Force | Out-Null
+foreach ($icon in $IconFiles) {
+    $src = Join-Path $ProjectRoot $icon
+    if (Test-Path $src) {
+        Copy-Item -Path $src -Destination $iconDest
+        Write-Host "  ✔ $icon" -ForegroundColor Green
+    } else {
+        Write-Host "  ⚠ $icon not found" -ForegroundColor Yellow
     }
 }
 
