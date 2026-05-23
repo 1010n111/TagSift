@@ -47,8 +47,8 @@
 
 ```bash
 # 1. 下载或克隆本项目
-git clone https://github.com/your-username/ai-tag-extension.git
-cd ai-tag-extension
+git clone https://github.com/1010n111/TagSift.git
+cd TagSift
 
 # 2. 打开 Chrome 扩展管理页
 chrome://extensions
@@ -218,6 +218,35 @@ done
                                             │  .local       │
                                             └──────────────┘
 ```
+
+---
+
+## ☕ 支持项目
+
+如果这个扩展对你有所帮助，欢迎鼓励一下作者 🙏
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="imgs/zfb.jpg" width="200" alt="支付宝赞赏码" /><br/>
+        <strong>支付宝</strong>
+      </td>
+      <td align="center">
+        <img src="imgs/wx.png" width="200" alt="微信赞赏码" /><br/>
+        <strong>微信</strong>
+      </td>
+    </tr>
+  </table>
+</div>
+
+你的支持是持续维护和更新项目的动力 ❤️
+
+---
+
+## 🔒 隐私政策
+
+本扩展**不收集个人数据**，所有标签仅存储在本地。详见 [PRIVACY.md](PRIVACY.md)。
 
 ---
 

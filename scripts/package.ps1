@@ -39,6 +39,7 @@ $IncludeItems = @(
     "bookmarks",
     "content",
     "icons",
+    "imgs",
     "lib",
     "options",
     "popup"
