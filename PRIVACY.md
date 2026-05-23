@@ -87,7 +87,7 @@
 如有问题，请通过以下方式联系：
 
 - **项目主页**：https://github.com/1010n111/TagSift
-- **邮箱**：support@ai-tag-extension.example.com
+- **邮箱**：1192915210@qq.com
 
 ---
 
