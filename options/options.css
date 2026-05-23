@@ -339,6 +339,12 @@ body {
   text-decoration: underline;
 }
 
+.privacy-sep {
+  color: var(--border-color);
+  margin: 0 8px;
+  font-size: 12px;
+}
+
 /* ====== Donation / Support ====== */
 .donation-section {
   margin-top: 24px;
